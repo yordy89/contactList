@@ -1,17 +1,11 @@
 import { Controller, Get, Post, Delete, Put, Param, Res, Body, NotFoundException, HttpStatus } from '@nestjs/common';
 import { ContactService } from './contact.service'
 import { ContactDTO } from './dto/contact.dto'
+import { SearchDTO } from './dto/search.dto'
 
 @Controller('contact')
 export class ContactController {
     constructor(private contactService: ContactService) { }
-
-    @Get()
-    async getContacts(@Res() res) {
-        const contact = await this.contactService.getContacts()
-        if (!contact) throw new NotFoundException('No hay contactos para mostrar')
-        return res.status(HttpStatus.OK).json(contact)
-    }
 
     @Post()
     async createContact(@Res() res, @Body() contactDTO: ContactDTO) {
@@ -32,5 +26,12 @@ export class ContactController {
         const contact = await this.contactService.updateContact(contactId, contactDTO)
         if (!contact) throw new NotFoundException('No se pudo actualizar el contacto')
         return res.status(HttpStatus.OK).json(contact)
+    }
+
+    @Post('/search')
+    async searchContact(@Res() res, @Body() searchParams: SearchDTO[]){
+        const contacts = await this.contactService.searchContact(searchParams)
+        if (!contacts) throw new NotFoundException('No se encontraron coincidencias')
+        return res.status(HttpStatus.OK).json(contacts)
     }
 }
